@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- These are the options displayed in the sale drop-down Spinner -->
+    <string-array name="array_sale_options">
+        <item>@string/status_unknown</item>
+        <item>@string/sale_success</item>
+        <item>@string/sale_failure</item>
+    </string-array>
+
+    <!-- These are the options displayed in the shipped drop-down Spinner -->
+    <string-array name="array_ship_options">
+        <item>@string/status_unknown</item>
+        <item>@string/ship_success</item>
+        <item>@string/ship_failure</item>
+    </string-array>
+
+</resources>
