@@ -244,6 +244,11 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             quantity++;
         else
             quantity--;
+        if (quantity < 0) {
+            Toast.makeText(EditorActivity.this, getString(R.string.negative_quantity),
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
         values.put(ProductEntry.COLUMN_PROD_QUANTITY, quantity);
         int rowsUpdated = getContentResolver().update(mCurrentProductUri, values,
                 null, null);

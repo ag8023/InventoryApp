@@ -25,6 +25,8 @@
     <string name="editor_delete_product_failed">Failed to delete the product in the database.</string>
     <string name="editor_delete_product_successful">Product deleted successfully in the database.</string>
 
+    <string name="negative_quantity">Quantity cannot be negative!</string>
+
     <!-- Text for the buttons and labels in the editor activity layout -->
     <string name="name">Name</string>
     <string name="price">Price</string>

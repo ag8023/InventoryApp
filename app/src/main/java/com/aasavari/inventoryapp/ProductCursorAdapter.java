@@ -83,7 +83,7 @@ public class ProductCursorAdapter extends CursorAdapter {
                                                    null, null);
                 }
                 else{
-                    Toast.makeText(view.getContext(), "The quantity cannot be negative",
+                    Toast.makeText(view.getContext(), R.string.negative_quantity,
                             Toast.LENGTH_SHORT).show();
                 }
             }

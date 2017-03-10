@@ -8,9 +8,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.widget.Toast;
 
+import com.aasavari.inventoryapp.R;
 import com.aasavari.inventoryapp.data.InventoryContract.ProductEntry;
 
 import static com.aasavari.inventoryapp.data.InventoryContract.CONTENT_AUTHORITY;
@@ -128,10 +128,10 @@ public class InventoryProvider extends ContentProvider {
          SQLiteDatabase db = mDbHelper.getWritableDatabase();
          rowId = db.insert(TABLE_NAME, null, contentValues);
          if (rowId == -1) {
-            Log.e(LOG_TAG, "Failed to insert row for " + uri);
-             return null;
+             Toast.makeText(getContext(), R.string.editor_insert_prod_failed,
+                     Toast.LENGTH_SHORT).show();
             }
-        Toast.makeText(getContext(), "Product added successfully to the database",
+        Toast.makeText(getContext(), R.string.editor_insert_prod_successful,
                 Toast.LENGTH_SHORT).show();
 
         //Notify all listeners that the data has changed for the product content uri
@@ -148,7 +148,7 @@ public class InventoryProvider extends ContentProvider {
         int rowsDeleted = -1;
         switch(match){
             case PRODUCTS:
-                rowsDeleted =  db.delete(TABLE_NAME, selection, selectionArgs);
+                db.delete(TABLE_NAME, selection, selectionArgs);
             case PRODUCT_ID:
                 selection = ProductEntry._ID + "=?";
                 selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
