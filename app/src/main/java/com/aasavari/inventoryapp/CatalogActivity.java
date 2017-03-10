@@ -7,11 +7,9 @@ import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.widget.CursorAdapter;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -26,8 +24,8 @@ import static com.aasavari.inventoryapp.data.InventoryContract.ProductEntry.CONT
 import static com.aasavari.inventoryapp.data.InventoryContract.ProductEntry._ID;
 
 public class CatalogActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
-    ProductCursorAdapter mCursorAdapter;
     private static int PRODUCT_LOADER = 0;
+    ProductCursorAdapter mCursorAdapter;
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
@@ -109,10 +107,8 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
                 //Form the content URI that represents the specific product that was clicked on,
                 // by appending the "id"(passed as input to this method) onto the content uri.
                 Uri currentProductUri = ContentUris.withAppendedId(CONTENT_URI, id);
-                Log.i("Aasavari: ", currentProductUri.toString());
                 //Set the URI on the data field of the intent
                 editIntent.setData(currentProductUri);
-
                 //Launch the activity to display the data for the current product
                 startActivity(editIntent);
             }

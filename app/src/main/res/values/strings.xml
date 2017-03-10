@@ -16,6 +16,8 @@
     <string name="edit_title">Edit Product</string>
     <string name="editor_update_product_failed">Failed to update the product in the database.</string>
     <string name="editor_update_product_successful">Product updated successfully in the database.</string>
+    <string name="editor_delete_product_failed">Failed to delete the product in the database.</string>
+    <string name="editor_delete_product_successful">Product deleted successfully in the database.</string>
 
     <string name="name">Name</string>
     <string name="price">Price</string>
@@ -23,10 +25,9 @@
     <string name="supplier">Supplier</string>
     <string name="photo">Picture</string>
     <string name="sale">Sell</string>
-    <string name="save_product">Save</string>
-    <string name="sell_product">Track Sale</string>
-    <string name="shipment">Receive Shipment </string>
-    <string name="order">Order from Supplier</string>
-    <string name="delete_product">Delete</string>
+    <string name="save">Save</string>
+    <string name="shipment">Receive</string>
+    <string name="order">Order</string>
+    <string name="delete">Delete</string>
 
 </resources>

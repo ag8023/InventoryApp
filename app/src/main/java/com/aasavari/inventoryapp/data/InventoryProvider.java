@@ -10,11 +10,8 @@ import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import java.net.URI;
+import com.aasavari.inventoryapp.data.InventoryContract.ProductEntry;
 
-import static android.R.attr.id;
-import static android.R.attr.name;
-import static android.os.Build.PRODUCT;
 import static com.aasavari.inventoryapp.data.InventoryContract.CONTENT_AUTHORITY;
 import static com.aasavari.inventoryapp.data.InventoryContract.PATH_PRODUCTS;
 import static com.aasavari.inventoryapp.data.InventoryContract.ProductEntry.COLUMN_PROD_NAME;
@@ -25,25 +22,21 @@ import static com.aasavari.inventoryapp.data.InventoryContract.ProductEntry.CONT
 import static com.aasavari.inventoryapp.data.InventoryContract.ProductEntry.CONTENT_LIST_TYPE;
 import static com.aasavari.inventoryapp.data.InventoryContract.ProductEntry.TABLE_NAME;
 
-import com.aasavari.inventoryapp.data.InventoryContract.ProductEntry;
-
 /**
  * Created by Aasavari on 3/6/2017.
  */
 
 public class InventoryProvider extends ContentProvider {
 
-    private InventoryDbHelper mDbHelper; // global so that all the provider methods can access this object
     public static final String LOG_TAG = InventoryProvider.class.getSimpleName();
     //Uri matcher code for the content Uri in the products table
     private static final int PRODUCTS = 100;
     //Uri matcher code for the content Uri for a single product in the products table
     private static final int PRODUCT_ID = 101;
+    private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
     //Create a Uri Matcher object to match a content URI to a corresponding code.
     //The input passed into the constructor represents the code to return for the root URI.
     // Its common to use NO_MATCH as the input for this case.
-
-    private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
     static {
         /*
@@ -54,9 +47,11 @@ public class InventoryProvider extends ContentProvider {
         sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_PRODUCTS + "/#", PRODUCT_ID);
     }
 
+    private InventoryDbHelper mDbHelper; // global so that all the provider methods can access this object
+
     /**
      * Initialize the provider and the database helper object
-     * @return
+     *
      */
     @Override
     public boolean onCreate() {
@@ -69,7 +64,6 @@ public class InventoryProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
 
-        Log.i(LOG_TAG, uri.toString());
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
         Cursor cursor;
         final int match = sUriMatcher.match(uri);
@@ -217,8 +211,6 @@ public class InventoryProvider extends ContentProvider {
             quantity = values.getAsInteger(COLUMN_PROD_QUANTITY);
         if(values.containsKey(COLUMN_PROD_SUPPLIER))
             supplier = values.getAsString(COLUMN_PROD_SUPPLIER);
-        if(name == null || supplier == null || price == null || quantity == null || quantity < 0 || price < 0)
-            return false;
-        return true;
+        return !(name == null || supplier == null || price == null || quantity == null || quantity < 0 || price < 0);
     }
 }
