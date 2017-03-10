@@ -11,14 +11,21 @@
     <string name="ship_success">Shipped</string>
     <string name="ship_failure">Not Shipped</string>
     <string name="status_unknown">Unknown</string>
-    <string name="empty_view_text">You have no products stored currently</string>
+    <string name="empty_view_text">You have no products stored currently. You can click on the icon
+    below to add a new product to your inventory. Please be sure to fill out all the fields.</string>
+    <!--App Bar headings for add and edit activities -->
     <string name="add_title">Add Product</string>
     <string name="edit_title">Edit Product</string>
+
+    <!-- Toast messages notifying user of product update failure or success -->
     <string name="editor_update_product_failed">Failed to update the product in the database.</string>
     <string name="editor_update_product_successful">Product updated successfully in the database.</string>
+
+    <!-- Toast messages notifying user of product delete failure or success -->
     <string name="editor_delete_product_failed">Failed to delete the product in the database.</string>
     <string name="editor_delete_product_successful">Product deleted successfully in the database.</string>
 
+    <!-- Text for the buttons and labels in the editor activity layout -->
     <string name="name">Name</string>
     <string name="price">Price</string>
     <string name="quantity">Quantity</string>
@@ -33,5 +40,11 @@
     <string name="quantity_hint">100</string>
     <string name="email_hint">xyz@example.com</string>
     <string name="image_button">Add Product Image</string>
+
+    <!-- Dialog message to ask the user to confirm deleting the current product [CHAR LIMIT=NONE] -->
+    <string name="delete_dialog_msg">Delete this product?</string>
+
+    <!-- Dialog button text for the option to cancel deletion of the current pet [CHAR LIMIT=20] -->
+    <string name="cancel">Cancel</string>
 
 </resources>

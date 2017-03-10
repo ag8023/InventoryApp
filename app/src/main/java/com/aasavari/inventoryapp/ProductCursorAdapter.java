@@ -7,25 +7,19 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.support.v4.widget.CursorAdapter;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.aasavari.inventoryapp.data.InventoryContract;
 import com.aasavari.inventoryapp.data.InventoryContract.ProductEntry;
-
-import org.w3c.dom.Text;
 
 import static com.aasavari.inventoryapp.data.InventoryContract.ProductEntry.COLUMN_PROD_NAME;
 import static com.aasavari.inventoryapp.data.InventoryContract.ProductEntry.COLUMN_PROD_PRICE;
 import static com.aasavari.inventoryapp.data.InventoryContract.ProductEntry.COLUMN_PROD_QUANTITY;
 import static com.aasavari.inventoryapp.data.InventoryContract.ProductEntry.COLUMN_PROD_SALE;
-import static com.aasavari.inventoryapp.data.InventoryContract.ProductEntry.COLUMN_PROD_SUPPLIER;
 import static com.aasavari.inventoryapp.data.InventoryContract.ProductEntry.CONTENT_URI;
 import static com.aasavari.inventoryapp.data.InventoryContract.ProductEntry._ID;
 
@@ -46,22 +40,6 @@ public class ProductCursorAdapter extends CursorAdapter {
     //This helps in smoother scrolling of the listview as it prevents multiple redundant
     //calls to findviewbyid, every time a new listitem has to be created
     //hence this class is declared as static.
-
-    static class ProductViewHolder{
-        TextView txtName;
-        TextView txtPrice;
-        TextView txtQuantity;
-        Button btnSell;
-
-
-        public ProductViewHolder(View view){
-            txtName = (TextView)view.findViewById(R.id.name);
-            txtPrice = (TextView)view.findViewById(R.id.price);
-            txtQuantity = (TextView)view.findViewById(R.id.quantity);
-            btnSell = (Button)view.findViewById(R.id.sale_btn);
-        }
-
-    }
 
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
@@ -94,25 +72,39 @@ public class ProductCursorAdapter extends CursorAdapter {
                 if(iQuantity > 0) {
                     int newQuantity = iQuantity;
                     newQuantity--;
-                    Log.i(LOG_TAG, "The Quantity to update " + newQuantity);
                     int itemsSold = cursor.getInt(cursor.getColumnIndex(COLUMN_PROD_SALE));
                     itemsSold++;
-                    Log.i(LOG_TAG, "The solditems to update " + itemsSold);
                     int id = cursor.getInt(cursor.getColumnIndex(_ID));
                     ContentValues values = new ContentValues();
                     values.put(ProductEntry.COLUMN_PROD_QUANTITY, newQuantity);
                     values.put(ProductEntry.COLUMN_PROD_SALE, itemsSold);
                     Uri currentProductUri = ContentUris.withAppendedId(CONTENT_URI, id);
-                    Log.i(LOG_TAG, currentProductUri.toString());
-                    int rows = resolver.update(currentProductUri, values,
+                    resolver.update(currentProductUri, values,
                                                    null, null);
                 }
                 else{
-                    Log.i(LOG_TAG, "The quantity cannot be negative");
+                    Toast.makeText(view.getContext(), "The quantity cannot be negative",
+                            Toast.LENGTH_SHORT).show();
                 }
             }
         });
 
+
+    }
+
+    static class ProductViewHolder {
+        TextView txtName;
+        TextView txtPrice;
+        TextView txtQuantity;
+        Button btnSell;
+
+
+        public ProductViewHolder(View view) {
+            txtName = (TextView) view.findViewById(R.id.name);
+            txtPrice = (TextView) view.findViewById(R.id.price);
+            txtQuantity = (TextView) view.findViewById(R.id.quantity);
+            btnSell = (Button) view.findViewById(R.id.sale_btn);
+        }
 
     }
 }

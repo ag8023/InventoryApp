@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.ContentValues;
 import android.content.CursorLoader;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
@@ -12,6 +13,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
@@ -103,53 +105,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mSaveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                strName = mName.getText().toString().trim();
-                fPrice = Float.parseFloat(mPrice.getText().toString().trim());
-                iQuantity = Integer.parseInt(mQuantity.getText().toString().trim());
-                strSupplier = mSupplier.getText().toString().trim();
-
-                if (strName.isEmpty() || strSupplier.isEmpty())
-                    return;
-
-                ContentValues values = new ContentValues();
-                values.put(COLUMN_PROD_NAME, strName);
-                values.put(COLUMN_PROD_PRICE, fPrice);
-                values.put(COLUMN_PROD_QUANTITY, iQuantity);
-                values.put(COLUMN_PROD_SUPPLIER, strSupplier);
-                if (mImageUri != null) {
-                    strImageUri = mImageUri.toString();
-                    values.put(COLUMN_PROD_IMAGE, strImageUri);
-                }
-                if(mCurrentProductUri == null) {
-                    //check to see if any of the mandatory fields for the database are empty
-                    // or have invalid data like -ve prices or quantities
-                    if(TextUtils.isEmpty(strName) && TextUtils.isEmpty(strSupplier)
-                        && iQuantity < 0 && fPrice < 0.0f)
-                            return;
-                    //This is a new product, so insert in database
-                    getContentResolver().insert(CONTENT_URI, values);
-                }
-                else {
-                    //This is an existing product so update it in the database
-                    int rowsAffected = getContentResolver().update(mCurrentProductUri,
-                            values, null, null);
-                   // Show a toast message depending on whether or not the update was successful.
-                    if(rowsAffected == 0){
-                        // If no rows were affected, then there was an error with the update.
-                        Toast.makeText(EditorActivity.this, getString(R.string.editor_update_product_failed),
-                                Toast.LENGTH_SHORT).show();
-                    }else {
-                        // Otherwise, the update was successful and we can display a toast.
-                        Toast.makeText(EditorActivity.this, getString(R.string.editor_update_product_successful),
-                                Toast.LENGTH_SHORT).show();
-                    }
-                }
-                mName.setText("");
-                mPrice.setText("");
-                mQuantity.setText("");
-                mSupplier.setText("");
-
-                finish();
+                saveProduct();
             }
         });
 
@@ -157,19 +113,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             @Override
             public void onClick(View view) {
 
-                int rowsDeleted = getContentResolver().delete(mCurrentProductUri, null, null);
-                // Show a toast message depending on whether or not the update was successful.
-                if (rowsDeleted == 0) {
-                    // If no rows were deleted, then there was an error with the delete operation.
-                    Toast.makeText(EditorActivity.this, getString(R.string.editor_delete_product_failed),
-                            Toast.LENGTH_SHORT).show();
-                } else {
-                    // Otherwise, the update was successful and we can display a toast.
-                    Toast.makeText(EditorActivity.this, getString(R.string.editor_delete_product_successful),
-                            Toast.LENGTH_SHORT).show();
-                }
-
-                finish();
+                showDeleteConfirmationDialog();
             }
         });
 
@@ -191,15 +135,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mOrderButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String supplierEmail = mSupplier.getText().toString().trim();
-                String productName = mName.getText().toString().trim();
-                Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
-                emailIntent.setData(Uri.parse("mailto:")); // only email apps will get the intent
-                emailIntent.putExtra(Intent.EXTRA_SUBJECT, "New Order for more " + productName);
-                emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{supplierEmail});
-                if (emailIntent.resolveActivity(getPackageManager()) != null) {
-                    startActivity(emailIntent);
-                }
+                orderProduct();
             }
         });
 
@@ -212,6 +148,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
 
     } // end of OnCreate method()
+
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
@@ -241,7 +178,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        Log.i(LOG_TAG, " onLoadFinished");
+
         if (cursor == null || cursor.getCount() < 1)
             return;
         // Proceed with moving to the first row of the cursor and reading data from it
@@ -269,6 +206,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             mQuantity.setText(Integer.toString(iQuantity));
             mSupplier.setText(strSupplier);
             mAddImageButton.setText(strImageUri);
+            mImage.setImageBitmap(getBitmapFromUri(Uri.parse(strImageUri)));
         }
 
 
@@ -286,7 +224,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
     //This helper method is used to hide the buttons related to editing the product details.
     //This is called only when the user needs to add a new product.
-    public void hideEditActivityButtons() {
+    private void hideEditActivityButtons() {
 
         mSellButton.setVisibility(View.GONE);
         mReceiveButton.setVisibility(View.GONE);
@@ -297,7 +235,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
     //This is a method to update the product quantity in the db, depending on which button
     // modified the quantity
-    public void updateProductQuantity(String action) {
+    private void updateProductQuantity(String action) {
 
         ContentValues values = new ContentValues();
         String sQuantity = mQuantity.getText().toString().trim();
@@ -322,7 +260,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
     }
 
-    public void openImageSelector() {
+    private void openImageSelector() {
         Intent intent;
 
         if (Build.VERSION.SDK_INT < 19) {
@@ -365,13 +303,15 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
     //This method takes the image uri received from the intent data , as input, and
     // returns a scaled bitmap image that can fit into the imageview.
-    public Bitmap getBitmapFromUri(Uri uri) {
+    private Bitmap getBitmapFromUri(Uri uri) {
         if (uri == null || uri.toString().isEmpty())
             return null;
 
         // Get the dimensions of the ImageView where the image has to be displayed
         int targetW = mImage.getWidth();
         int targetH = mImage.getHeight();
+        Log.i(LOG_TAG, "Actual imageView width is : " + targetW);
+        Log.i(LOG_TAG, "Actual imageView height is : " + targetH);
 
         InputStream input = null;
         try {
@@ -386,13 +326,15 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             int photoW = bmOptions.outWidth;
             int photoH = bmOptions.outHeight;
 
+            Log.i(LOG_TAG, "Actual photo width is : " + photoW);
+            Log.i(LOG_TAG, "Actual photo height is : " + photoH);
+
             // Determine how much to scale down the image
             int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
 
             // Decode the image file into a Bitmap sized to fill the View
             bmOptions.inJustDecodeBounds = false;
             bmOptions.inSampleSize = scaleFactor;
-            bmOptions.inPurgeable = true;
 
             input = this.getContentResolver().openInputStream(uri);
             Bitmap bitmap = BitmapFactory.decodeStream(input, null, bmOptions);
@@ -413,5 +355,119 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             }
         }
 
+    }
+
+    private void showDeleteConfirmationDialog() {
+        //Create an AlertDialog.Builder and set the message, and click listeners
+        //for the positive and negative buttons on the dialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.delete_dialog_msg);
+        builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                //user clicked the delete button so delete the product
+                deleteProduct();
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                // User clicked the "Cancel" button, so dismiss the dialog
+                // and continue editing the product.
+                if (dialogInterface != null) {
+                    dialogInterface.dismiss();
+                }
+            }
+        });
+
+        //create and show the AlertDialog
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    private void deleteProduct() {
+        int rowsDeleted = getContentResolver().delete(mCurrentProductUri, null, null);
+        // Show a toast message depending on whether or not the update was successful.
+        if (rowsDeleted == 0) {
+            // If no rows were deleted, then there was an error with the delete operation.
+            Toast.makeText(EditorActivity.this, getString(R.string.editor_delete_product_failed),
+                    Toast.LENGTH_SHORT).show();
+        } else {
+            // Otherwise, the update was successful and we can display a toast.
+            Toast.makeText(EditorActivity.this, getString(R.string.editor_delete_product_successful),
+                    Toast.LENGTH_SHORT).show();
+        }
+
+        finish();
+    }
+
+    private void orderProduct() {
+        String supplierEmail = mSupplier.getText().toString().trim();
+        String productName = mName.getText().toString().trim();
+        Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
+        emailIntent.setData(Uri.parse("mailto:")); // only email apps will get the intent
+        emailIntent.putExtra(Intent.EXTRA_SUBJECT, "New Order for more " + productName);
+        emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{supplierEmail});
+        if (emailIntent.resolveActivity(getPackageManager()) != null) {
+            startActivity(emailIntent);
+        }
+    }
+
+    private void saveProduct() {
+        strName = mName.getText().toString().trim();
+        fPrice = Float.parseFloat(mPrice.getText().toString().trim());
+        iQuantity = Integer.parseInt(mQuantity.getText().toString().trim());
+        strSupplier = mSupplier.getText().toString().trim();
+
+        // validate all the entries
+        if (TextUtils.isEmpty(mName.getText().toString())
+                || TextUtils.isEmpty(mSupplier.getText().toString())
+                || TextUtils.isEmpty(mPrice.getText().toString())
+                || TextUtils.isEmpty(mQuantity.getText().toString())
+                || mImageUri == null) {
+            // you could also add a toast info here
+            Toast.makeText(EditorActivity.this, "Please fill all the entries.", Toast.LENGTH_SHORT).show();
+
+            return;
+        }
+
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_PROD_NAME, strName);
+        values.put(COLUMN_PROD_PRICE, fPrice);
+        values.put(COLUMN_PROD_QUANTITY, iQuantity);
+        values.put(COLUMN_PROD_SUPPLIER, strSupplier);
+        if (mImageUri != null) {
+            strImageUri = mImageUri.toString();
+            values.put(COLUMN_PROD_IMAGE, strImageUri);
+        }
+        if (mCurrentProductUri == null) {
+            //check to see if any of the mandatory fields for the database are empty
+            // or have invalid data like -ve prices or quantities
+            if (TextUtils.isEmpty(strName) && TextUtils.isEmpty(strSupplier)
+                    && iQuantity < 0 && fPrice < 0.0f)
+                return;
+            //This is a new product, so insert in database
+            getContentResolver().insert(CONTENT_URI, values);
+        } else {
+            //This is an existing product so update it in the database
+            int rowsAffected = getContentResolver().update(mCurrentProductUri,
+                    values, null, null);
+            // Show a toast message depending on whether or not the update was successful.
+            if (rowsAffected == 0) {
+                // If no rows were affected, then there was an error with the update.
+                Toast.makeText(EditorActivity.this, getString(R.string.editor_update_product_failed),
+                        Toast.LENGTH_SHORT).show();
+            } else {
+                // Otherwise, the update was successful and we can display a toast.
+                Toast.makeText(EditorActivity.this, getString(R.string.editor_update_product_successful),
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
+        mName.setText("");
+        mPrice.setText("");
+        mQuantity.setText("");
+        mSupplier.setText("");
+
+        finish();
     }
 }

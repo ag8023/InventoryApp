@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.aasavari.inventoryapp.data.InventoryContract.ProductEntry;
 
@@ -130,6 +131,8 @@ public class InventoryProvider extends ContentProvider {
             Log.e(LOG_TAG, "Failed to insert row for " + uri);
              return null;
             }
+        Toast.makeText(getContext(), "Product added successfully to the database",
+                Toast.LENGTH_SHORT).show();
 
         //Notify all listeners that the data has changed for the product content uri
         getContext().getContentResolver().notifyChange(uri, null);
