@@ -152,7 +152,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        Log.i(LOG_TAG, " onCreateLoader");
+
         //define a projection that specifies the columns that we care about
         String [] projection = {
                 _ID,
@@ -419,10 +419,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     }
 
     private void saveProduct() {
-        strName = mName.getText().toString().trim();
-        fPrice = Float.parseFloat(mPrice.getText().toString().trim());
-        iQuantity = Integer.parseInt(mQuantity.getText().toString().trim());
-        strSupplier = mSupplier.getText().toString().trim();
 
         // validate all the entries
         if (TextUtils.isEmpty(mName.getText().toString())
@@ -435,6 +431,10 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
             return;
         }
+        strName = mName.getText().toString().trim();
+        fPrice = Float.parseFloat(mPrice.getText().toString().trim());
+        iQuantity = Integer.parseInt(mQuantity.getText().toString().trim());
+        strSupplier = mSupplier.getText().toString().trim();
 
         ContentValues values = new ContentValues();
         values.put(COLUMN_PROD_NAME, strName);
